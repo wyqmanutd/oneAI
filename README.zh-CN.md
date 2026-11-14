@@ -67,7 +67,7 @@ npm run build:portable   # 便携版（可选）：release/OneAI-Portable-<versi
 npm run build:mac        # 在 Apple Silicon 上生成 release/OneAI-<version>-mac-arm64.dmg 和 .zip
 ```
 
-macOS 注意事项：首先安装 Xcode Command Line Tools 与 Node.js。macOS 打包时会针对 Electron arm64 重编译原生 `node-pty` 模块；Windows 打包配置保持不变。当前 macOS 测试版未签名、未公证，首次打开可能需要在系统设置中手动允许。通过 Finder 启动时，OneAI 会读取登录 Shell 的 `PATH` 来查找 CLI。macOS 的应用快捷键及复制粘贴使用 Command，**Ctrl+Tab** 仍用于切换任务（Command+Tab 是系统切换应用快捷键），终端中的 Ctrl+C 用于中断命令。
+macOS 注意事项：首先安装 Xcode Command Line Tools 与 Node.js 22.12+（推荐 Node.js 24）。macOS 打包时会针对 Electron arm64 重编译原生 `node-pty` 模块，并修复 `spawn-helper` 可执行权限；Windows 打包配置保持不变。当前 macOS 测试版未签名、未公证，首次打开可能需要在系统设置中手动允许。通过 Finder 启动时，OneAI 会读取登录 Shell 的 `PATH` 来查找 CLI。macOS 的应用快捷键及复制粘贴使用 Command，**Ctrl+Tab** 仍用于切换任务（Command+Tab 是系统切换应用快捷键），终端中的 Ctrl+C 用于中断命令。
 
 旧产物被占用、无法覆盖时，可将新产物写入独立目录：
 

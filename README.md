@@ -67,7 +67,7 @@ npm run build:portable   # portable build (optional): release/OneAI-Portable-<ve
 npm run build:mac        # on Apple Silicon: release/OneAI-<version>-mac-arm64.dmg and .zip
 ```
 
-macOS notes: install Xcode Command Line Tools and Node.js first. The build rebuilds the native `node-pty` addon for Electron arm64; the Windows build settings remain unchanged. The macOS build is currently unsigned/not notarized, so macOS may require manual approval to open it. CLI discovery reads the login shell's `PATH` when launched from Finder. On macOS, use Command for application shortcuts and copying/pasting; **Ctrl+Tab** still switches tasks because Command+Tab belongs to the operating system. Ctrl+C in the terminal sends an interrupt.
+macOS notes: install Xcode Command Line Tools and Node.js 22.12+ (Node.js 24 recommended) first. The build rebuilds the native `node-pty` addon for Electron arm64 and repairs its `spawn-helper` executable permissions; the Windows build settings remain unchanged. The macOS build is currently unsigned/not notarized, so macOS may require manual approval to open it. CLI discovery reads the login shell's `PATH` when launched from Finder. On macOS, use Command for application shortcuts and copying/pasting; **Ctrl+Tab** still switches tasks because Command+Tab belongs to the operating system. Ctrl+C in the terminal sends an interrupt.
 
 If an old artifact is locked and cannot be overwritten, write the new one to a separate directory:
 
