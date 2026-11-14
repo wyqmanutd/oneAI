@@ -16,6 +16,7 @@
     "package.json"
   ],
   "asar": true,
+  "afterPack": "scripts/prepare-macos-pty.cjs",
   "asarUnpack": [
     "**/node_modules/node-pty/**/*"
   ],

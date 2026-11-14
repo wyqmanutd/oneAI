@@ -7,6 +7,7 @@
   "main": "dist-electron/main/index.js",
   "type": "module",
   "scripts": {
+    "postinstall": "node scripts/prepare-macos-pty.cjs",
     "dev": "vite",
     "build": "tsc && vite build",
     "check:ui": "node scripts/check-ui.mjs",

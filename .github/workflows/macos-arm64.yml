@@ -36,6 +36,7 @@ jobs:
           test -d release/mac-arm64/OneAI.app
           file release/mac-arm64/OneAI.app/Contents/MacOS/OneAI | grep -q arm64
           file release/mac-arm64/OneAI.app/Contents/Resources/app.asar.unpacked/node_modules/node-pty/prebuilds/darwin-arm64/pty.node | grep -q arm64
+          test -x release/mac-arm64/OneAI.app/Contents/Resources/app.asar.unpacked/node_modules/node-pty/prebuilds/darwin-arm64/spawn-helper
       - name: Upload macOS test builds
         uses: actions/upload-artifact@v4
         with:
