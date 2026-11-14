@@ -15,7 +15,7 @@
     "preview": "vite preview",
     "build:win": "npm run build && electron-builder --win",
     "build:portable": "npm run build && electron-builder --win portable",
-    "build:mac": "npm run build && electron-builder --mac --arm64 -c.npmRebuild=true"
+    "build:mac": "npm run build && electron-builder --mac --arm64 --publish never -c.npmRebuild=true"
   },
   "dependencies": {
     "@xterm/addon-fit": "^0.10.0",
