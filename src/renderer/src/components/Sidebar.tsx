@@ -9,6 +9,7 @@ import { AppLogo } from './AppLogo';
 import { MusicPlayer } from './MusicPlayer';
 import { version } from '../../../../package.json';
 import { T, t } from '../i18n';
+import { macShortcut } from '../platform';
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -244,7 +245,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       data-task-id={task.id}
                       onClick={() => onSelectTask(task.id)}
                       aria-current={isActive ? 'true' : undefined}
-                      title={`${t('{label}（{status}）', { label, status: `${statusMeta.label}${isUnread ? t('，待查看') : ''}` })}${order <= 9 ? ` Ctrl+${order}` : ''}`}
+                      title={macShortcut(`${t('{label}（{status}）', { label, status: `${statusMeta.label}${isUnread ? t('，待查看') : ''}` })}${order <= 9 ? ` Ctrl+${order}` : ''}`)}
                       aria-label={t('{label}，{status}', { label, status: `${statusMeta.label}${isUnread ? t('，待查看') : ''}` })}
                       className={`relative flex h-7 w-9 shrink-0 items-center justify-center rounded-md font-mono text-xs tabular-nums transition-colors ${isActive ? 'bg-selected font-medium text-fg' : isUnread ? 'bg-accent font-semibold text-canvas hover:bg-accent/85' : 'text-fg-subtle hover:bg-hover hover:text-fg'}`}
                     >
@@ -262,7 +263,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <button type="button" onClick={onAddFolder} className="icon-btn h-8 w-8" title={t('添加文件夹')} aria-label={t('添加文件夹')}>
             <FolderPlus size={15} className="text-accent" />
           </button>
-          <button type="button" onClick={onOpenSettings} className="icon-btn h-8 w-8" title={t('设置 (Ctrl+,)')} aria-label={t('设置')}>
+          <button type="button" onClick={onOpenSettings} className="icon-btn h-8 w-8" title={macShortcut(t('设置 (Ctrl+,)'))} aria-label={t('设置')}>
             <Settings size={15} />
           </button>
         </div>
@@ -538,7 +539,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                 </span>
                               )}
                               {(taskOrder.get(task.id) ?? 99) <= 9 && (
-                                <span className="font-mono text-2xs font-normal text-fg-faint" title={t('Ctrl+{n} 切换到此任务', { n: taskOrder.get(task.id) ?? '' })} aria-hidden="true">{taskOrder.get(task.id)}</span>
+                                <span className="font-mono text-2xs font-normal text-fg-faint" title={macShortcut(t('Ctrl+{n} 切换到此任务', { n: taskOrder.get(task.id) ?? '' }))} aria-hidden="true">{taskOrder.get(task.id)}</span>
                               )}
                             </span>
                             </div>
@@ -573,7 +574,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div className="flex items-center justify-between px-2 pb-1.5 pt-4 text-2xs text-fg-faint">
               <span className="font-semibold tracking-wider">{t('最近任务')}<span className="ml-1.5 tabular-nums">{recentFolders.length}</span></span>
               {onOpenHistory && (
-                <button type="button" onClick={onOpenHistory} className="flex items-center gap-1 rounded px-1 hover:text-accent" title={t('查看所有历史会话 (Ctrl+Shift+H)')} aria-label={t('查看所有历史会话')}>
+                <button type="button" onClick={onOpenHistory} className="flex items-center gap-1 rounded px-1 hover:text-accent" title={macShortcut(t('查看所有历史会话 (Ctrl+Shift+H)'))} aria-label={t('查看所有历史会话')}>
                   <History size={11} aria-hidden="true" />{t('全部')}
                 </button>
               )}
@@ -648,7 +649,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           type="button"
           onClick={onOpenSettings}
           className="icon-btn h-8 w-8"
-          title={t('设置 (Ctrl+,)')}
+          title={macShortcut(t('设置 (Ctrl+,)'))}
           aria-label={t('设置')}
         >
           <Settings size={15} />

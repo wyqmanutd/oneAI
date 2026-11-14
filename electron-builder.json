@@ -28,6 +28,15 @@
       }
     ]
   },
+  "mac": {
+    "icon": "resources/icon.png",
+    "category": "public.app-category.developer-tools",
+    "artifactName": "${productName}-${version}-mac-${arch}.${ext}",
+    "target": [
+      { "target": "dmg", "arch": ["arm64"] },
+      { "target": "zip", "arch": ["arm64"] }
+    ]
+  },
   "nsis": {
     "artifactName": "${productName}-Setup-${version}.exe"
   },

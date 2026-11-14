@@ -1,12 +1,12 @@
 import { BrowserWindow } from 'electron';
 import os from 'node:os';
-import { spawn, ChildProcessWithoutNullStreams } from 'node:child_process';
+import { execFile, spawn, ChildProcessWithoutNullStreams } from 'node:child_process';
 
 export interface SystemStats {
   cpuPercent: number;            // 0-100，两次采样之间的整机 CPU 占用
   memUsedBytes: number;
   memTotalBytes: number;
-  netUpBytesPerSec: number | null;   // 取不到网络计数（非 Windows、没有处于 Up 状态的物理网卡、读取失败）时为 null
+  netUpBytesPerSec: number | null;   // 没有可用的网络计数或读取失败时为 null
   netDownBytesPerSec: number | null;
 }
 
@@ -40,6 +40,42 @@ while ($null -ne [Console]::In.ReadLine()) {
 }`;
 
 interface NetCounters { rx: number; tx: number; adapters: string }
+
+/** macOS: read cumulative byte counters for physical en* interfaces. */
+function readMacNetCounters(): Promise<NetCounters | null> {
+  return new Promise((resolve) => {
+    execFile('/usr/sbin/netstat', ['-ibn'], { encoding: 'utf8', timeout: 4000, maxBuffer: 1024 * 1024 }, (error, stdout) => {
+      if (error) return resolve(null);
+      const lines = stdout.trim().split(/\r?\n/);
+      const header = lines.find((line) => /^Name\s/.test(line) && /\bIbytes\b/.test(line) && /\bObytes\b/.test(line));
+      if (!header) return resolve(null);
+      const columns = header.trim().split(/\s+/);
+      const rxAt = columns.indexOf('Ibytes');
+      const txAt = columns.indexOf('Obytes');
+      const networkAt = columns.indexOf('Network');
+      const maxAt = Math.max(rxAt, txAt);
+      const interfaces = new Map<string, { rx: number; tx: number }>();
+      for (const line of lines) {
+        const values = line.trim().split(/\s+/);
+        const name = values[0];
+        if (!/^en\d+$/.test(name) || values.length <= maxAt) continue;
+        // netstat lists IPv4/IPv6 rows as well; use only the link-layer row.
+        if (networkAt >= 0 && !/^(?:<Link#|link#)/i.test(values[networkAt] || '')) continue;
+        const rx = Number(values[rxAt]);
+        const tx = Number(values[txAt]);
+        if (!Number.isSafeInteger(rx) || !Number.isSafeInteger(tx)) continue;
+        interfaces.set(name, { rx, tx });
+      }
+      if (interfaces.size === 0) return resolve(null);
+      const names = [...interfaces.keys()].sort();
+      resolve({
+        adapters: names.join('|'),
+        rx: names.reduce((sum, name) => sum + interfaces.get(name)!.rx, 0),
+        tx: names.reduce((sum, name) => sum + interfaces.get(name)!.tx, 0),
+      });
+    });
+  });
+}
 
 class NetCounterReader {
   private child: ChildProcessWithoutNullStreams | null = null;
@@ -129,7 +165,7 @@ class SystemSampler {
 
   async sample(): Promise<SystemStats | null> {
     const cpu = cpuTimes();
-    const net = await this.netReader.read();
+    const net = process.platform === 'darwin' ? await readMacNetCounters() : await this.netReader.read();
     const now = Date.now();
     const seconds = (now - this.lastAt) / 1000;
     const prevCpu = this.lastCpu;

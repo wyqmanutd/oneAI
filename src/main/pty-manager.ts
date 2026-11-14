@@ -4,12 +4,13 @@ import * as os from 'node:os';
 import fs from 'node:fs';
 import { buildAccountEnv, SessionAccount } from './account-env';
 import { t } from './i18n';
+import { defaultShell, shellQuote } from './shell-platform';
 
 interface CreateSessionOptions {
   id: string;
   command?: string;
   cwd?: string;
-  shell?: boolean; // 自定义 CLI：整条命令交给 PowerShell 解析，兼容 .cmd / .ps1 启动器与带参数的命令
+  shell?: boolean; // 自定义 CLI：整条命令交给当前平台的 Shell 解析
   account?: SessionAccount; // 多账号：按账号的配置目录注入 CODEX_HOME / CLAUDE_CONFIG_DIR；重启时沿用
   cols?: number;
   rows?: number;
@@ -96,9 +97,9 @@ export class PtyManager {
 
     try {
       const isWindows = os.platform() === 'win32';
-      const defaultShell = isWindows ? 'powershell.exe' : (process.env.SHELL || '/bin/bash');
-      const rawCommand = (command || defaultShell).trim();
-      let workDir = cwd || process.env.USERPROFILE || process.cwd();
+      const systemShell = defaultShell();
+      const rawCommand = (command || systemShell).trim();
+      const workDir = cwd || os.homedir();
       if (!fs.existsSync(workDir) || !fs.statSync(workDir).isDirectory()) {
         return { success: false, error: t('工作目录不存在或不是文件夹：{dir}', { dir: workDir }) };
       }
@@ -111,7 +112,7 @@ export class PtyManager {
       }
 
       // 正确拆分可执行文件与命令行参数
-      let file = defaultShell;
+      let file = systemShell;
       let args: string[] = [];
 
       if (isWindows) {
@@ -161,8 +162,16 @@ export class PtyManager {
           file = 'powershell.exe';
           args = ['-NoExit', '-ExecutionPolicy', 'Bypass', '-Command', rawCommand];
         }
-      } else {
+      } else if (rawCommand === systemShell || /^(?:\/bin\/)?(?:zsh|bash|sh)$/.test(rawCommand)) {
+        // 系统终端：直接运行交互式登录 Shell。
         file = rawCommand;
+        args = ['-l', '-i'];
+      } else {
+        // 在登录 Shell 中执行命令，确保用户的 PATH / Shell 配置可用。
+        // CLI 退出后仍保留可交互的 Shell，与 Windows 的 -NoExit 行为一致。
+        // 这也支持 `codex resume <id>`、自定义 CLI 和其他带参数的命令。
+        file = systemShell;
+        args = ['-l', '-i', '-c', `${rawCommand}\nexec ${shellQuote(systemShell)} -l -i`];
       }
 
       console.log(`[PTY] Spawning session ${id}: file=${file}, args=${JSON.stringify(args)}, cwd=${workDir}`);

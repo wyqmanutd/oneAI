@@ -13,5 +13,6 @@ export const BUILTIN_CLIS: CliDef[] = [
   { id: 'kimi', name: 'Kimi Code', icon: 'kimi', defaultCommand: 'kimi' },
   { id: 'opencode', name: 'OpenCode', icon: 'opencode', defaultCommand: 'opencode' },
   { id: 'grok', name: 'Grok Build', icon: 'grok', defaultCommand: 'grok' },
-  { id: 'terminal', get name() { return t('系统终端'); }, icon: 'terminal', defaultCommand: 'powershell.exe' },
+  // 空命令由主进程选择本机默认 Shell（Windows PowerShell / macOS zsh 等）。
+  { id: 'terminal', get name() { return t('系统终端'); }, icon: 'terminal', defaultCommand: '' },
 ];

@@ -655,6 +655,9 @@ html, body, #root {
 .window-drag, .topbar { -webkit-app-region: drag; }
 .window-drag button, .window-drag input, .window-drag a, .window-drag select, .topbar button, .topbar input, .topbar a, .topbar [role='menu'] { -webkit-app-region: no-drag; }
 .topbar { padding-right: max(0.625rem, calc(100vw - env(titlebar-area-width, 100vw))); }
+/* macOS 的红黄绿窗口按钮在左上角。窄侧栏保留这一行，防止 logo 被覆盖。 */
+.platform-mac #oneai-sidebar.w-12 { width: 5.5rem; }
+.platform-mac #oneai-sidebar.w-12 > .window-drag:first-child > * { visibility: hidden; }
 
 /* 细轨道滑块：音乐进度、音量与字号 */
 input[type='range'].slim {

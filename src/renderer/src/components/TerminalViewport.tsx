@@ -7,6 +7,7 @@ import '@xterm/xterm/css/xterm.css';
 import { TaskSession, ThemeId } from '../types';
 import { TerminalSearchBar } from './TerminalSearchBar';
 import { t } from '../i18n';
+import { isMac, isWindows, primaryModifierPressed } from '../platform';
 
 export interface TerminalViewportRef {
   openSearch: () => void;
@@ -671,7 +672,7 @@ export const TerminalViewport = forwardRef<TerminalViewportRef, TerminalViewport
 
         const term = new Terminal({
           theme: TERMINAL_THEMES[theme],
-          fontFamily: 'Consolas, "Cascadia Code", "Fira Code", monospace',
+          fontFamily: isMac ? 'Menlo, "SFMono-Regular", "Fira Code", monospace' : 'Consolas, "Cascadia Code", "Fira Code", monospace',
           fontSize,
           lineHeight,
           cursorBlink,
@@ -684,10 +685,10 @@ export const TerminalViewport = forwardRef<TerminalViewportRef, TerminalViewport
           altClickMovesCursor: false,
           // 搜索高亮用到 registerDecoration，属于 xterm 的 proposed API，不开启会直接抛错
           allowProposedApi: true,
-          windowsPty: {
+          ...(isWindows ? { windowsPty: {
             backend: 'conpty',
             buildNumber: 26200,
-          },
+          } } : {}),
         });
 
         const fitAddon = new FitAddon();
@@ -710,7 +711,7 @@ export const TerminalViewport = forwardRef<TerminalViewportRef, TerminalViewport
 
         // 链接需按住 Ctrl 单击才打开，避免点终端聚焦或划选时误触；悬停时给出提示
         const linkHover = {
-          hover: () => { termContainer.title = t('按住 Ctrl 单击打开'); },
+          hover: () => { termContainer.title = isMac ? t('按住 Command 单击打开') : t('按住 Ctrl 单击打开'); },
           leave: () => { termContainer.title = ''; },
         };
 
@@ -735,7 +736,7 @@ export const TerminalViewport = forwardRef<TerminalViewportRef, TerminalViewport
                   range,
                   ...linkHover,
                   activate: (e: MouseEvent, text: string) => {
-                    if (!e.ctrlKey) return;
+                    if (!primaryModifierPressed(e)) return;
                     if (window.electronAPI?.openExternal) {
                       window.electronAPI.openExternal(text);
                     } else {
@@ -784,7 +785,7 @@ export const TerminalViewport = forwardRef<TerminalViewportRef, TerminalViewport
                     text: item.raw,
                     range: item.range,
                     ...linkHover,
-                    activate: (e: MouseEvent) => { if (e.ctrlKey) onPreviewFileRef.current?.(task.cwd, target, item.line); },
+                    activate: (e: MouseEvent) => { if (primaryModifierPressed(e)) onPreviewFileRef.current?.(task.cwd, target, item.line); },
                   }];
                 });
                 callback(links.length > 0 ? links : undefined);
@@ -885,14 +886,14 @@ export const TerminalViewport = forwardRef<TerminalViewportRef, TerminalViewport
           }
 
           // 1. 搜索快捷键 Ctrl+Shift+F（Ctrl+F 留给 CLI）
-          if (e.ctrlKey && e.shiftKey && !e.altKey && (e.key === 'f' || e.key === 'F')) {
+          if (primaryModifierPressed(e) && e.shiftKey && !e.altKey && (e.key === 'f' || e.key === 'F')) {
             e.preventDefault();
             setIsSearchOpen(true);
             return false;
           }
 
           // 2. 清屏快捷键 Ctrl+Shift+K（Ctrl+K 是 readline「删到行尾」）
-          if (e.ctrlKey && e.shiftKey && !e.altKey && (e.key === 'k' || e.key === 'K')) {
+          if (primaryModifierPressed(e) && e.shiftKey && !e.altKey && (e.key === 'k' || e.key === 'K')) {
             e.preventDefault();
             clearTerminal(task.id);
             return false;
@@ -901,7 +902,12 @@ export const TerminalViewport = forwardRef<TerminalViewportRef, TerminalViewport
           // 3. 复制快捷键支持：
           // - Ctrl+C（无 Shift）：若有划选文本，执行复制并阻止向 PTY 发送 SIGINT 中断信号；若无划选，放行发送中断信号
           // - Ctrl+Shift+C 或 Ctrl+Insert：终端标准复制
-          if (e.ctrlKey && !e.shiftKey && !e.altKey && (e.key === 'c' || e.key === 'C')) {
+          if (isMac && e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && (e.key === 'c' || e.key === 'C')) {
+            e.preventDefault();
+            if (term.hasSelection()) handleCopy();
+            return false;
+          }
+          if (!isMac && e.ctrlKey && !e.shiftKey && !e.altKey && (e.key === 'c' || e.key === 'C')) {
             if (term.hasSelection()) {
               handleCopy();
               return false;
@@ -910,7 +916,7 @@ export const TerminalViewport = forwardRef<TerminalViewportRef, TerminalViewport
           }
 
           if (
-            (e.ctrlKey && e.shiftKey && (e.key === 'c' || e.key === 'C')) ||
+            (!isMac && e.ctrlKey && e.shiftKey && (e.key === 'c' || e.key === 'C')) ||
             (e.ctrlKey && e.key === 'Insert')
           ) {
             handleCopy();
@@ -921,7 +927,7 @@ export const TerminalViewport = forwardRef<TerminalViewportRef, TerminalViewport
           // - Ctrl+V / Ctrl+Shift+V
           // - Shift+Insert（传统终端粘贴）
           if (
-            (e.ctrlKey && (e.key === 'v' || e.key === 'V')) ||
+            (primaryModifierPressed(e) && (e.key === 'v' || e.key === 'V')) ||
             (e.shiftKey && e.key === 'Insert')
           ) {
             // xterm 返回 false 时不会阻止默认行为，浏览器仍会触发原生 paste 事件，

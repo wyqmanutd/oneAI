@@ -3,6 +3,7 @@ import { Pencil, Plus, RotateCw, Trash2 } from 'lucide-react';
 import { CustomCli } from '../types';
 import { newCustomCliId, validateCustomCli } from '../customClis';
 import { t } from '../i18n';
+import { isMac } from '../platform';
 
 interface KnownCli {
   id: string;
@@ -155,7 +156,9 @@ export const CliSettings: React.FC<CliSettingsProps> = ({ fallbackKnownClis, cus
               <input id="custom-cli-command" className="input select-text font-mono" value={draft.command} placeholder="mycli --model fast"
                 onChange={(e) => setDraft({ ...draft, command: e.target.value })} />
               <p className="mt-1.5 text-xs text-fg-faint">
-                {t('可带参数，在新任务的终端（PowerShell）里原样执行，需要这个命令已在 PATH 中；也可以写完整路径，路径有空格时加引号。未找到命令时它不会出现在新建菜单里。')}
+                {isMac
+                  ? t('可带参数，在新任务的登录 Shell 中运行；命令必须在 PATH 中，也可以写完整路径。未找到命令时它不会出现在新建菜单里。')
+                  : t('可带参数，在新任务的终端（PowerShell）里原样执行，需要这个命令已在 PATH 中；也可以写完整路径，路径有空格时加引号。未找到命令时它不会出现在新建菜单里。')}
               </p>
             </div>
             <div className="flex justify-end gap-2">

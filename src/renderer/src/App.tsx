@@ -21,6 +21,7 @@ import { sanitizeCustomClis, toCliDef } from './customClis';
 import { getLanguage, isLanguage, setLanguage, systemLanguage, t } from './i18n';
 import { THEME_MODE } from './themes';
 import { isTaskAlive } from './taskStatus';
+import { isMac, primaryModifierPressed } from './platform';
 
 const DEFAULT_SETTINGS: AppSettings = {
   language: systemLanguage(),
@@ -153,7 +154,7 @@ export const App: React.FC = () => {
     }
     return window.electronAPI.createSession({
       id: task.id,
-      command: task.command || cli.defaultCommand,
+      command: task.command !== undefined ? task.command : cli.defaultCommand,
       cwd: task.cwd,
       shell: cli.custom,
       account: account && toSessionAccount(account),
@@ -257,7 +258,7 @@ export const App: React.FC = () => {
   // 全局快捷键缩放终端字体（Ctrl + / Ctrl - / Ctrl 0）
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey || e.metaKey) {
+      if (primaryModifierPressed(e)) {
         if (e.key === '=' || e.key === '+') {
           e.preventDefault();
           setSettings((prev) => ({
@@ -630,14 +631,14 @@ export const App: React.FC = () => {
     const account = accountId ? settings.accounts.find((item) => item.id === accountId) : undefined;
     if (accountId && !account) return { success: false, error: t('所选账号配置不存在，请在「设置 → 账号」中检查。') };
     if (window.electronAPI) {
-      const result = await window.electronAPI.createSession({ id: newTaskId, command: command || 'powershell.exe', cwd: resolvedCwd, account: account && toSessionAccount(account) });
+       const result = await window.electronAPI.createSession({ id: newTaskId, command, cwd: resolvedCwd, account: account && toSessionAccount(account) });
       if (!result.success) return { success: false, error: result.error || t('终端启动失败') };
     }
     const newTask: TaskSession = {
       id: newTaskId,
       groupId,
       title,
-      command: command || 'powershell.exe',
+      command,
       historyId,
       accountId,
       status: 'running',
@@ -773,7 +774,9 @@ export const App: React.FC = () => {
   // 只占用终端程序基本不用的组合（Ctrl+Tab、Ctrl+数字、Ctrl+Shift+字母、Ctrl+,）。
   const shortcutRef = useRef<(e: KeyboardEvent) => boolean>(() => false);
   shortcutRef.current = (e) => {
-    if (!e.ctrlKey || e.altKey || e.metaKey) return false;
+    // macOS 保留 Ctrl+Tab：Command+Tab 被系统用于切换应用，不会发给窗口。
+    const macTaskCycle = isMac && e.ctrlKey && !e.metaKey && e.key.toLowerCase() === 'tab';
+    if ((!primaryModifierPressed(e) && !macTaskCycle) || e.altKey) return false;
     if (isNewTaskOpen || isSettingsOpen || isHistoryOpen || isUsageOpen || workReminderVisible || confirmOptions) return false;
     const ordered = orderedTasks(folders, visibleTasks);
     const key = e.key.toLowerCase();

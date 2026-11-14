@@ -49,7 +49,7 @@ export interface CliDef {
   name: string;            // 显示名称，如 "Codex", "Kimi Code"
   icon: string;            // 品牌专属 Logo，未内置的 CLI 回退为通用终端图标
   defaultCommand: string;  // 默认拉起命令模版
-  custom?: boolean;        // 用户在「设置 → CLI」里自定义的 CLI：启动时整条命令交给 PowerShell 解析
+  custom?: boolean;        // 自定义 CLI：完整命令交给当前平台的 Shell 解析
 }
 
 /** 用户自定义的 CLI（AppSettings.customClis）：名称与完整启动命令，没有品牌图标，用通用终端图标 */

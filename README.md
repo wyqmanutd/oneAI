@@ -46,9 +46,10 @@ A CLI that is not listed can be added under Settings → CLI with a name and a s
 
 ## Install
 
-OneAI currently runs on **Windows 10 / 11 (x64)**, because it relies on the Windows ConPTY API. The AI CLIs themselves are not bundled: install the ones you want separately and make sure their commands are on your `PATH`.
+OneAI supports **Windows 10 / 11 (x64)**. The `feat/macos-apple-silicon` branch additionally includes **experimental macOS Apple Silicon (arm64)** support. Windows uses ConPTY; macOS uses a native Unix PTY and your login shell. The AI CLIs themselves are not bundled: install the ones you want separately and make sure their commands are on your `PATH`.
 
 - **Installer**: download `OneAI-Setup-<version>.exe` from the [latest release](https://github.com/keepingFE/oneAI/releases/latest) and run it.
+- **macOS arm64 test build**: on this branch, run `npm run build:mac` on an Apple Silicon Mac, or download an unsigned build from the [macOS workflow](https://github.com/wyqmanutd/oneAI/actions/workflows/macos-arm64.yml) after it passes. These are test artifacts, not notarized public releases.
 - **From source**: see below.
 
 On first launch OneAI asks for the interface language, then shows a short guide. After that, add a project folder, click the "+" next to it and pick a CLI.
@@ -63,7 +64,10 @@ npm run dev              # start the workbench in development mode
 npm run build            # type-check and build
 npm run build:win        # installer: release/OneAI-Setup-<version>.exe
 npm run build:portable   # portable build (optional): release/OneAI-Portable-<version>.exe
+npm run build:mac        # on Apple Silicon: release/OneAI-<version>-mac-arm64.dmg and .zip
 ```
+
+macOS notes: install Xcode Command Line Tools and Node.js first. The build rebuilds the native `node-pty` addon for Electron arm64; the Windows build settings remain unchanged. The macOS build is currently unsigned/not notarized, so macOS may require manual approval to open it. CLI discovery reads the login shell's `PATH` when launched from Finder. On macOS, use Command for application shortcuts and copying/pasting; **Ctrl+Tab** still switches tasks because Command+Tab belongs to the operating system. Ctrl+C in the terminal sends an interrupt.
 
 If an old artifact is locked and cannot be overwritten, write the new one to a separate directory:
 

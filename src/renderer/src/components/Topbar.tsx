@@ -6,6 +6,7 @@ import { QuotaData, TaskSession, CliDef } from '../types';
 import { TASK_STATUS_META } from '../taskStatus';
 import { BrandIcon } from './BrandIcon';
 import { getLanguage, t } from '../i18n';
+import { macShortcut } from '../platform';
 
 interface TopbarProps {
   isSidebarCollapsed: boolean;
@@ -171,7 +172,7 @@ export const Topbar: React.FC<TopbarProps> = ({
           aria-label={isSidebarCollapsed ? t('展开左侧导航栏') : t('折叠左侧导航栏')}
           aria-expanded={!isSidebarCollapsed}
           aria-controls="oneai-sidebar"
-          title={`${isSidebarCollapsed ? t('展开左侧导航栏') : t('折叠左侧导航栏')} (Ctrl+Shift+B)`}
+          title={macShortcut(`${isSidebarCollapsed ? t('展开左侧导航栏') : t('折叠左侧导航栏')} (Ctrl+Shift+B)`)}
           className="icon-btn"
         >
           {isSidebarCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
@@ -214,10 +215,10 @@ export const Topbar: React.FC<TopbarProps> = ({
         {/* 终端工具 */}
         {activeTask && (
           <div id="oneai-terminal-tools" role="group" aria-label={t('终端工具')} className="flex shrink-0 items-center gap-0.5 border-l border-line pl-2">
-            <button type="button" onClick={onOpenSearch} title={t('在终端中搜索关键词 (Ctrl+Shift+F)')} aria-label={t('在终端中搜索')} className="icon-btn">
+            <button type="button" onClick={onOpenSearch} title={macShortcut(t('在终端中搜索关键词 (Ctrl+Shift+F)'))} aria-label={t('在终端中搜索')} className="icon-btn">
               <Search size={15} />
             </button>
-            <button type="button" onClick={onClearScreen} title={t('清空当前屏幕与历史缓存 (Ctrl+Shift+K)')} aria-label={t('清空屏幕')} className="icon-btn">
+            <button type="button" onClick={onClearScreen} title={macShortcut(t('清空当前屏幕与历史缓存 (Ctrl+Shift+K)'))} aria-label={t('清空屏幕')} className="icon-btn">
               <Eraser size={15} />
             </button>
             <button
@@ -286,7 +287,7 @@ export const Topbar: React.FC<TopbarProps> = ({
           type="button"
           onClick={onOpenUsage}
           aria-label={t('查看本周用量')}
-          title={t('本周各模型用量与每日使用频次 (Ctrl+Shift+U)')}
+          title={macShortcut(t('本周各模型用量与每日使用频次 (Ctrl+Shift+U)'))}
           className="icon-btn"
         >
           <BarChart3 size={16} />
@@ -298,7 +299,7 @@ export const Topbar: React.FC<TopbarProps> = ({
           type="button"
           onClick={onOpenHistory}
           aria-label={t('查看历史会话')}
-          title={t('查看所有 CLI 的历史会话 (Ctrl+Shift+H)')}
+          title={macShortcut(t('查看所有 CLI 的历史会话 (Ctrl+Shift+H)'))}
           className="icon-btn"
         >
           <History size={16} />

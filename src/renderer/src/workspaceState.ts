@@ -1,5 +1,6 @@
 import { BUILTIN_CLIS, defaultWorkspacePath } from './clis';
 import { CliDef, FolderEntry, HistoryEntry, TaskSession } from './types';
+import { isWindows } from './platform';
 
 /** 渲染进程持有、持久化的全部任务与文件夹状态 */
 export interface AppState {
@@ -18,9 +19,12 @@ export interface RecentFolder {
   total: number;              // 该文件夹的会话总数
 }
 
-/** 文件夹的比较键：忽略大小写、末尾分隔符与正反斜杠差异 */
+/** Windows 路径大小写不敏感；Unix 路径保留大小写（可能使用大小写敏感的 APFS）。 */
 export function folderKey(folder: string): string {
-  return folder.replace(/[\\/]+$/, '').replace(/\//g, '\\').toLowerCase();
+  const windowsPath = isWindows || /^[A-Za-z]:[\\/]/.test(folder) || folder.startsWith('\\\\');
+  return windowsPath
+    ? folder.replace(/[\\/]+$/, '').replace(/\//g, '\\').toLowerCase()
+    : folder.replace(/\/+$/, '') || '/';
 }
 
 export function folderName(folder: string): string {

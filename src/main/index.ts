@@ -15,6 +15,7 @@ import { setupWorkspaceStore } from './workspace-store';
 import { setupMusicLibrary } from './music-library';
 import { setupFilePreview } from './file-preview';
 import { getLanguage, setLanguage, t } from './i18n';
+import { initializeMacPath } from './shell-platform';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -48,8 +49,8 @@ function createWindow() {
       nodeIntegration: false,
     },
     // 隐藏原生标题栏，由顶栏承担拖动与标题栏职责；窗口控件（最小化 / 最大化 / 关闭）以覆盖层显示在右上角，颜色由渲染进程随主题同步
-    titleBarStyle: 'hidden',
-    titleBarOverlay: { color: '#161b22', symbolColor: '#e2e8f0', height: 44 },
+    titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'hidden',
+    ...(process.platform === 'darwin' ? {} : { titleBarOverlay: { color: '#161b22', symbolColor: '#e2e8f0', height: 44 } }),
     autoHideMenuBar: true,
   });
 
@@ -294,10 +295,12 @@ function setupIPC() {
   });
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  await initializeMacPath();
   // 去掉 Electron 默认菜单：它的 Ctrl+W 关窗、Ctrl+R 刷新与 CLI 常用键冲突，按 Alt 还会弹出菜单栏抢走焦点。
   // 开发模式保留，方便用 Ctrl+Shift+I 打开开发者工具。
-  if (!process.env.VITE_DEV_SERVER_URL) Menu.setApplicationMenu(null);
+  // macOS 需要原生应用菜单（退出、编辑、复制/粘贴等）。
+  if (process.platform !== 'darwin' && !process.env.VITE_DEV_SERVER_URL) Menu.setApplicationMenu(null);
   setupIPC();
   createWindow();
 

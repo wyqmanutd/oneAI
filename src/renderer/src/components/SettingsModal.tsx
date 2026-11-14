@@ -4,6 +4,7 @@ import { Account, AppSettings, CustomCli } from '../types';
 import { THEME_OPTIONS } from '../themes';
 import { Modal } from './Modal';
 import { LANGUAGES, T, dateLocale, t } from '../i18n';
+import { isMac, macShortcut } from '../platform';
 import { AccountsSettings } from './AccountsSettings';
 import { CliSettings } from './CliSettings';
 
@@ -252,7 +253,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             <>
               <Section
                 title={t('字体大小')}
-                hint={t('Ctrl + / - 亦可缩放')}
+                hint={macShortcut(t('Ctrl + / - 亦可缩放'))}
                 aside={<span className="rounded-md border border-accent/30 bg-accent/10 px-2 py-0.5 font-mono text-xs font-bold text-accent">{settings.terminalFontSize}px</span>}
               >
                 <div className="flex items-center gap-3">
@@ -336,7 +337,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </div>
               </Section>
 
-              <Section title={t('文件预览')} hint={t('Ctrl + 单击终端里的文件路径打开')}>
+              <Section title={t('文件预览')} hint={macShortcut(t('Ctrl + 单击终端里的文件路径打开'))}>
                 <div className={row}>
                   <span>
                     <span className="block">{t('显示代码缩略图（minimap）')}</span>
@@ -483,8 +484,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <dl className="divide-y divide-line overflow-hidden rounded-md border border-line">
                 {group.items.map(([keys, desc]) => (
                   <div key={keys} className="flex items-center justify-between gap-4 bg-muted px-3 py-2">
-                    <dt className="text-ui text-fg-muted">{t(desc)}</dt>
-                    <dd className="shrink-0 rounded border border-line-strong bg-canvas px-1.5 py-0.5 font-mono text-xs text-fg-subtle">{t(keys)}</dd>
+                    <dt className="text-ui text-fg-muted">{isMac && keys === 'Ctrl + C' ? t('复制选中文本；Ctrl+C 中断命令') : t(desc)}</dt>
+                    <dd className="shrink-0 rounded border border-line-strong bg-canvas px-1.5 py-0.5 font-mono text-xs text-fg-subtle">{isMac && keys.startsWith('Ctrl + Tab') ? t(keys) : macShortcut(t(keys))}</dd>
                   </div>
                 ))}
               </dl>

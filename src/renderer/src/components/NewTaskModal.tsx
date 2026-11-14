@@ -5,6 +5,7 @@ import { folderName, nextTaskTitle, tasksInFolder } from '../workspaceState';
 import { BrandIcon } from './BrandIcon';
 import { Modal } from './Modal';
 import { t } from '../i18n';
+import { isMac } from '../platform';
 
 interface NewTaskModalProps {
   isOpen: boolean;
@@ -158,9 +159,9 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
             value={command}
             onChange={(e) => setCommand(e.target.value)}
             className="input font-mono"
-            placeholder={t('例如：powershell.exe')}
+            placeholder={isMac ? t('例如：/bin/zsh') : t('例如：powershell.exe')}
           />
-          <p className={hint}>{t('留空则启动系统的交互式 PowerShell。')}</p>
+          <p className={hint}>{isMac ? t('留空则启动系统的默认交互式 Shell。') : t('留空则启动系统的交互式 PowerShell。')}</p>
         </div>
 
         <div>

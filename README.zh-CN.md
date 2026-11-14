@@ -46,9 +46,10 @@ Codex、Claude Code、Kimi Code、OpenCode、Grok Build、Antigravity、Qwen Cod
 
 ## 安装
 
-OneAI 目前只支持 **Windows 10 / 11（x64）**，因为依赖 Windows ConPTY 接口。各 AI CLI 本身不随 OneAI 分发：请自行安装需要的 CLI，并确认它们的命令在 `PATH` 中。
+OneAI 支持 **Windows 10 / 11（x64）**。`feat/macos-apple-silicon` 分支新增了**实验性的 macOS Apple Silicon（arm64）**支持。Windows 使用 ConPTY，macOS 使用 Unix PTY 和用户的登录 Shell。各 AI CLI 本身不随 OneAI 分发：请自行安装需要的 CLI，并确认它们的命令在 `PATH` 中。
 
 - **安装包**：从[最新发布](https://github.com/keepingFE/oneAI/releases/latest)下载 `OneAI-Setup-<version>.exe` 并运行。
+- **macOS arm64 测试版**：可在 Apple Silicon Mac 上运行 `npm run build:mac`，也可在此分支的 [macOS 构建工作流](https://github.com/wyqmanutd/oneAI/actions/workflows/macos-arm64.yml)通过后下载未签名构建产物；尚非经过 Apple 公证的正式发行版。
 - **从源码构建**：见下文。
 
 首次启动时，OneAI 会请你选择界面语言，再显示一段简短的引导。之后添加项目文件夹，点文件夹右侧的「+」选择 CLI 即可。
@@ -63,7 +64,10 @@ npm run dev              # 开发模式启动工作台
 npm run build            # 类型检查并构建
 npm run build:win        # 安装版：release/OneAI-Setup-<version>.exe
 npm run build:portable   # 便携版（可选）：release/OneAI-Portable-<version>.exe
+npm run build:mac        # 在 Apple Silicon 上生成 release/OneAI-<version>-mac-arm64.dmg 和 .zip
 ```
+
+macOS 注意事项：首先安装 Xcode Command Line Tools 与 Node.js。macOS 打包时会针对 Electron arm64 重编译原生 `node-pty` 模块；Windows 打包配置保持不变。当前 macOS 测试版未签名、未公证，首次打开可能需要在系统设置中手动允许。通过 Finder 启动时，OneAI 会读取登录 Shell 的 `PATH` 来查找 CLI。macOS 的应用快捷键及复制粘贴使用 Command，**Ctrl+Tab** 仍用于切换任务（Command+Tab 是系统切换应用快捷键），终端中的 Ctrl+C 用于中断命令。
 
 旧产物被占用、无法覆盖时，可将新产物写入独立目录：
 

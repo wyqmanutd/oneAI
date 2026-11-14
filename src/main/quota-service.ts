@@ -184,7 +184,7 @@ export class QuotaService {
       terminal: {
         cliId: 'terminal',
         cliName: t('系统终端'),
-        model: 'PowerShell / CMD',
+        model: process.platform === 'darwin' ? 'zsh / Shell' : 'PowerShell / CMD',
         planType: 'Local Shell',
         fiveHourPercent: 100,
         fiveHourResetsIn: '--',
@@ -192,7 +192,7 @@ export class QuotaService {
         sevenDayResetsOn: '--',
         lastUpdated: Date.now(),
         status: 'normal',
-        message: 'PowerShell Ready',
+        message: process.platform === 'darwin' ? 'Shell Ready' : 'PowerShell Ready',
       },
     };
 
@@ -1209,7 +1209,7 @@ export class QuotaService {
   }
 
   private runAgyUsage(): Promise<string> {
-    const local = path.join(os.homedir(), '.local', 'bin', 'agy.exe');
+    const local = path.join(os.homedir(), '.local', 'bin', process.platform === 'win32' ? 'agy.exe' : 'agy');
     const bin = fs.existsSync(local) ? local : 'agy';
     return new Promise((resolve, reject) => {
       execFile(bin, ['-p', '/usage'], { cwd: os.homedir(), windowsHide: true, timeout: 30000 }, (err, stdout) => {
